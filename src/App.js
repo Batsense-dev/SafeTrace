@@ -9,6 +9,7 @@ import { i18n,changeLanguage } from "./lib/i18n";
 
 export default function App() {
   const Tabs = createBottomTabNavigator();
+
   const home = i18n.t('home');
   const rules = i18n.t('rules_privacy');
   return (
