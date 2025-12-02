@@ -1,57 +1,36 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, Text, View, Button, Share } from 'react-native';
-import * as Location from 'expo-location';
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import Home from "./screen/Home";
+import Rules from "./screen/Rules"; 
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { StyleSheet } from "react-native";
+import { i18n,changeLanguage } from "./lib/i18n";
+
 
 export default function App() {
-  const [location, setLocation] = React.useState(null);
-  const [errorMsg, setErrorMsg] = React.useState(null);
-
-  let latitude = null;
-  let longitude = null;
-  let altitude = null;
-
-async function getUserLocation() {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') {
-      setErrorMsg('Permission to access location was denied');
-      return;
-    }
-
-    let loc = await Location.getCurrentPositionAsync({});
-    setLocation(loc);
-  }
-  useEffect(() => {
-    getUserLocation();
-  }, []);
-  async function onShare() {
-    try {
-      const result = await Share.share({
-        message: `Au secour ! J'ai des problèmes je me trouve à la posistion indiqué par le lien ci-dessous: cliquez dessus pour ouvrir Google Maps.
-        \nLatitude: ${latitude}, 
-        \nLongitude: ${longitude}, 
-        \nAltitude: ${altitude}
-        \nhttps://www.google.com/maps/search/?api=1&query=${latitude}%2C${longitude}`,
-      });
-    } catch (error) {
-      alert(error.message);
-    }
-  }
-  let text = 'Cliquer sur le bouton pour obtenir la position';
-  if (errorMsg) {
-    text = errorMsg;
-  } else if (location) {
-    latitude = location.coords.latitude;
-    longitude = location.coords.longitude;
-    altitude = location.coords.altitude;
-    text = `Latitude: ${latitude}\nLongitude: ${longitude}\nAltitude: ${altitude}`;
-  } 
-
+  const Tabs = createBottomTabNavigator();
+  const home = i18n.t('home');
+  const rules = i18n.t('rules_privacy');
   return (
-    <View style={styles.container}>
-      <Button onPress={getUserLocation} title="Obtenir ma position" />  
-      <Text style={styles.text}>{text}</Text>
-      <Button onPress={onShare} title="Partager ma position" />
-    </View>
+    <NavigationContainer>
+      <Tabs.Navigator initialRouteName={home}
+        screenOptions={({ route }) => ({
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName;
+
+            if (route.name === home) {
+              iconName = focused ? 'home' : 'home-outline';
+            } else if (route.name === rules) {
+              iconName = focused ? 'receipt' : 'receipt-outline';
+            } 
+            return <Ionicons name={iconName} size={size} color={color} />;
+          }
+        })}
+      > 
+        <Tabs.Screen name={home} component={Home} />
+        <Tabs.Screen name={rules} component={Rules} />
+      </Tabs.Navigator>
+    </NavigationContainer>
   );
 }
 
